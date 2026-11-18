@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "ToySwap",
+    "slug": "toyswap",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.toyswap.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "ToySwap uses your photos so you can add a picture of the toy you want to sell or swap."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFD43B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.toyswap.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ToySwap uses your photos so you can add a picture of the toy you want to sell or swap."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 140,
+          "backgroundColor": "#FFD43B"
+        }
+      ],
+      "expo-web-browser"
+    ],
+    "scheme": "toyswap"
+  }
+}

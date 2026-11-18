@@ -1,0 +1,80 @@
+name: Android APK
+
+# Builds an installable APK on GitHub's servers every time main changes (or when you press "Run workflow").
+# The APK appears under Releases → "ToySwap for Android", ready to download on a phone.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      EXPO_NO_TELEMETRY: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Check settings
+        run: |
+          if [ -z "$EXPO_PUBLIC_SUPABASE_URL" ] || [ -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "::error::Add the repository variables SUPABASE_URL and SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions → Variables)."
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - name: Create the Android project
+        run: npx expo prebuild --platform android --no-install
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('package-lock.json') }}
+
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+
+      - name: Name the file
+        run: cp android/app/build/outputs/apk/release/app-release.apk ToySwap.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ToySwap-apk
+          path: ToySwap.apk
+
+      - name: Publish as a release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-${{ github.run_number }}
+          name: ToySwap for Android (build ${{ github.run_number }})
+          body: |
+            Download **ToySwap.apk** on your Android phone and tap it to install.
+            If Android asks, allow "Install unknown apps" for your browser.
+          files: ToySwap.apk
+          make_latest: true

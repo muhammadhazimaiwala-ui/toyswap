@@ -1,0 +1,5 @@
+# Supabase CLI settings (only needed if you use the Supabase CLI)
+project_id = "toyswap"
+
+[functions.stripe-webhook]
+verify_jwt = false
