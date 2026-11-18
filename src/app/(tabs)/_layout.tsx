@@ -41,8 +41,28 @@ export default function TabsLayout() {
         options={{
           title: 'Sell',
           tabBarAccessibilityLabel: 'Sell or swap a toy',
+          // The big round button says "sell" on its own, so it has no small label under it
+          // and sits higher than the bar, so nothing overlaps it.
+          tabBarLabel: () => null,
           tabBarIcon: () => (
-            <View style={{ width: 58, height: 58, marginTop: -22, borderRadius: 999, backgroundColor: C.acc, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, borderBottomColor: C.accDark }}>
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                marginTop: -30,
+                borderRadius: 999,
+                backgroundColor: C.acc,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 4,
+                borderColor: C.card,
+                shadowColor: '#1C1A3A',
+                shadowOpacity: 0.2,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 3 },
+                elevation: 6,
+              }}
+            >
               <Ionicons name="add" size={32} color="#fff" />
             </View>
           ),
