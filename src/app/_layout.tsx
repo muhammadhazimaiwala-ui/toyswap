@@ -4,6 +4,7 @@ import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { UpdateBanner } from '../components/UpdateBanner';
 import { configured } from '../lib/supabase';
 import { AppProvider, useApp } from '../store';
 import { C, F } from '../theme';
@@ -56,6 +57,7 @@ function Root() {
           <Stack.Screen name="register" />
         </Stack.Protected>
       </Stack>
+      <UpdateBanner />
     </>
   );
 }

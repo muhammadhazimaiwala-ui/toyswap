@@ -22,6 +22,9 @@ jobs:
     env:
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      # Lets the app notice when a newer APK is on the Releases page
+      EXPO_PUBLIC_BUILD_NUMBER: ${{ github.run_number }}
+      EXPO_PUBLIC_GITHUB_REPO: ${{ github.repository }}
       EXPO_NO_TELEMETRY: 1
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +52,9 @@ jobs:
           fi
 
       - run: npm ci
+
+      - name: Number this build (each APK installs over the last one)
+        run: node -e "const f='app.json';const a=require('./'+f);a.expo.android={...a.expo.android,versionCode:Number(process.env.GITHUB_RUN_NUMBER)};require('fs').writeFileSync(f,JSON.stringify(a,null,2))"
 
       - name: Create the Android project
         run: npx expo prebuild --platform android --no-install
