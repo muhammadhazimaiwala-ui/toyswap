@@ -36,15 +36,18 @@ export const siteUrl = () => (Deno.env.get('SITE_URL') ?? 'http://localhost:8081
 export const KID_EMAIL_DOMAIN = 'kids.toyswap.app';
 // ---- end helpers ----
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { httpClient: Stripe.createFetchHttpClient() });
+// Created on first use, so the function still answers clearly before the Stripe key is added.
+let _stripe: Stripe | null = null;
+const stripeClient = () => (_stripe ??= new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { httpClient: Stripe.createFetchHttpClient() }));
 const crypto = Stripe.createSubtleCryptoProvider();
 
 Deno.serve(async (req) => {
+  if (!Deno.env.get('STRIPE_SECRET_KEY') || !Deno.env.get('STRIPE_WEBHOOK_SECRET')) return new Response('Payments are not set up yet', { status: 503 });
   const sig = req.headers.get('Stripe-Signature');
   const body = await req.text();
   let event: Stripe.Event;
   try {
-    event = await stripe.webhooks.constructEventAsync(body, sig!, Deno.env.get('STRIPE_WEBHOOK_SECRET')!, undefined, crypto);
+    event = await stripeClient().webhooks.constructEventAsync(body, sig!, Deno.env.get('STRIPE_WEBHOOK_SECRET')!, undefined, crypto);
   } catch {
     return new Response('Bad signature', { status: 400 });
   }

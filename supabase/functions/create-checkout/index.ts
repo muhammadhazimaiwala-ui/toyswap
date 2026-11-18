@@ -36,7 +36,9 @@ export const siteUrl = () => (Deno.env.get('SITE_URL') ?? 'http://localhost:8081
 export const KID_EMAIL_DOMAIN = 'kids.toyswap.app';
 // ---- end helpers ----
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { httpClient: Stripe.createFetchHttpClient() });
+// Created on first use, so the function still answers clearly before the Stripe key is added.
+let _stripe: Stripe | null = null;
+const stripeClient = () => (_stripe ??= new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { httpClient: Stripe.createFetchHttpClient() }));
 const FEE = Number(Deno.env.get('PLATFORM_FEE_CENTS') ?? '0');
 
 Deno.serve(async (req) => {
@@ -58,7 +60,7 @@ Deno.serve(async (req) => {
     return fail('The seller’s parent hasn’t set up payouts yet. We’ve let them know; try again later.');
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripeClient().checkout.sessions.create({
     mode: 'payment',
     customer_email: user.email,
     line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: r.amount_cents, product_data: { name: `${toy!.name} (ToySwap)` } } }],

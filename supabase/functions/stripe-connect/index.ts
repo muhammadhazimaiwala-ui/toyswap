@@ -37,7 +37,9 @@ export const siteUrl = () => (Deno.env.get('SITE_URL') ?? 'http://localhost:8081
 export const KID_EMAIL_DOMAIN = 'kids.toyswap.app';
 // ---- end helpers ----
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { httpClient: Stripe.createFetchHttpClient() });
+// Created on first use, so the function still answers clearly before the Stripe key is added.
+let _stripe: Stripe | null = null;
+const stripeClient = () => (_stripe ??= new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { httpClient: Stripe.createFetchHttpClient() }));
 const COUNTRY: Record<string, string> = { 'United States': 'US', 'United Kingdom': 'GB', Canada: 'CA', India: 'IN' };
 
 Deno.serve(async (req) => {
@@ -54,7 +56,7 @@ Deno.serve(async (req) => {
   let accountId: string | null = p.stripe_account_id;
   if (action === 'status') {
     if (!accountId) return json({ ready: false });
-    const acct = await stripe.accounts.retrieve(accountId);
+    const acct = await stripeClient().accounts.retrieve(accountId);
     const ready = !!(acct.charges_enabled && acct.payouts_enabled);
     await db.from('parents').update({ stripe_ready: ready }).eq('id', user.id);
     return json({ ready });
@@ -63,7 +65,7 @@ Deno.serve(async (req) => {
   if (!accountId) {
     const country = COUNTRY[p.country];
     if (!country) return fail(`Card payouts aren't available in ${p.country} yet. You can still swap toys.`);
-    const acct = await stripe.accounts.create({
+    const acct = await stripeClient().accounts.create({
       type: 'express',
       country,
       email: user.email,
@@ -74,7 +76,7 @@ Deno.serve(async (req) => {
     accountId = acct.id;
     await db.from('parents').update({ stripe_account_id: accountId }).eq('id', user.id);
   }
-  const link = await stripe.accountLinks.create({
+  const link = await stripeClient().accountLinks.create({
     account: accountId,
     type: 'account_onboarding',
     refresh_url: `${siteUrl()}/parent?payouts=retry`,
