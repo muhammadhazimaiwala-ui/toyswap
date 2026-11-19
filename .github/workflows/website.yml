@@ -32,11 +32,28 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Serve from /<repo name>/
-        run: node -e "const f='app.json';const a=require('./'+f);a.expo.experiments={...(a.expo.experiments||{}),baseUrl:'/${{ github.event.repository.name }}'};require('fs').writeFileSync(f,JSON.stringify(a,null,2))"
-      - run: npx expo export --platform web --output-dir dist
-      - name: Make every page open the app
-        run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      - name: Work out the website address
+        run: |
+          # Set the repository variable SITE_BASE_URL (e.g. https://toyswap.com) after buying a domain.
+          SITE="${{ vars.SITE_BASE_URL }}"
+          if [ -z "$SITE" ]; then SITE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          SITE="${SITE%/}"
+          echo "SITE=$SITE" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$(node -e "console.log(new URL(process.argv[1]).pathname.replace(/\/$/,''))" "$SITE")" >> "$GITHUB_ENV"
+
+      - name: The app lives under /app/
+        run: node -e "const f='app.json';const a=require('./'+f);a.expo.experiments={...(a.expo.experiments||{}),baseUrl:process.env.BASE_PATH+'/app'};require('fs').writeFileSync(f,JSON.stringify(a,null,2))"
+
+      - run: npx expo export --platform web --output-dir dist/app
+
+      - name: Keep the logged-in app out of search results
+        run: sed -i 's#<head>#<head><meta name="robots" content="noindex">#' dist/app/index.html
+
+      - name: Public pages for Google and AI assistants (home, parents, safety, FAQ, sitemap, llms.txt)
+        run: python3 site/build.py dist "$SITE" "https://github.com/${{ github.repository }}/releases/latest/download/ToySwap.apk"
+
+      - name: Links into the app (like /app/parent) open the app
+        run: cp dist/app/index.html dist/404.html && touch dist/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
