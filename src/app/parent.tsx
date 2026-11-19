@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { callFunction, Kid, Req, rpc, timeAgo, useAction, useActivity, useParent, useRequests, useStories, useToysById } from '../api';
+import { GetAppButton } from '../components/GetAppButton';
 import { ToyArt, ToyTile } from '../components/ToyArt';
 import { Btn, Card, Chip, Face, Field, H2, Note, P, Pill, Screen, Small } from '../components/ui';
 import { AGES, AVATARS } from '../data';
@@ -156,6 +157,8 @@ export default function Parent() {
   return (
     <Screen title="Parent dashboard" refreshing={reqQ.isRefetching} onRefresh={refresh} right={<Btn label="Log out" kind="ghost" small onPress={() => supabase.auth.signOut()} />}>
       <P muted style={{ marginTop: -6 }}>Hi {parent?.full_name?.split(' ')[0] ?? 'there'}! You approve everything your kids sell, buy, swap or share.</P>
+
+      <GetAppButton compact />
 
       {kids.length === 0 || adding ? (
         <AddKid onDone={() => { setAdding(false); pq.refetch(); }} />

@@ -23,6 +23,7 @@ jobs:
     env:
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_GITHUB_REPO: ${{ github.repository }}
       EXPO_NO_TELEMETRY: 1
     steps:
       - uses: actions/checkout@v4

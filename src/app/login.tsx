@@ -2,6 +2,7 @@ import { Link } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GetAppButton } from '../components/GetAppButton';
 import { AuthHero } from '../components/Hero';
 import { Btn, Field, H1, Note, P } from '../components/ui';
 import { kidEmail, supabase } from '../lib/supabase';
@@ -74,6 +75,7 @@ export default function Login() {
             <P muted>New to ToySwap?</P>
             <Link href="/register" style={st.link}>Create a family account</Link>
           </View>
+          <GetAppButton />
           <Note>Kid accounts are set up by a parent, and a parent approves every sale or swap.</Note>
           <Note icon="information-circle-outline" bg={C.ys} fg={C.yi}>New family? A parent creates the account first, then adds each kid with a nickname and password.</Note>
         </View>

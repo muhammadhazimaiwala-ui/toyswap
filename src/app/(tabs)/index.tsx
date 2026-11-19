@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useKid, useRequests, useSaved, useToys } from '../../api';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GetAppButton } from '../../components/GetAppButton';
 import { ToyArt } from '../../components/ToyArt';
 import { ToyCard } from '../../components/ToyCard';
 import { Bar, Btn, Chip, Face, H2, IconBtn, P } from '../../components/ui';
@@ -70,6 +71,10 @@ export default function Home() {
         <View style={st.search}>
           <Ionicons name="search" size={20} color={C.muted} />
           <TextInput value={q} onChangeText={setQ} placeholder="Search toys, games, books…" placeholderTextColor="#6B6985" style={st.searchInput} accessibilityLabel="Search toys" returnKeyType="search" clearButtonMode="while-editing" />
+        </View>
+
+        <View style={{ marginHorizontal: 16, marginTop: 12 }}>
+          <GetAppButton compact />
         </View>
 
         {/* hero */}
